@@ -13,7 +13,7 @@ class SchedulerService {
     
     cron.schedule(cronExpression, async () => {
       console.log('Running daily digest job...');
-      await this.sendDailyDigests();
+      await SchedulerService.sendDailyDigests();
     });
   }
 
@@ -58,7 +58,7 @@ class SchedulerService {
       return await TwilioService.sendSMS(phoneNumber, message);
     } else {
       // Send to all users
-      return await this.sendDailyDigests();
+      return await SchedulerService.sendDailyDigests();
     }
   }
 }

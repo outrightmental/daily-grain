@@ -1,7 +1,16 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, '../../data/habits.db');
+// Determine database path with better path resolution
+const dbPath = process.env.DB_PATH || path.join(process.cwd(), 'data', 'habits.db');
+const dbDir = path.dirname(dbPath);
+
+// Ensure data directory exists
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
 const db = new Database(dbPath);
 
 // Enable foreign keys

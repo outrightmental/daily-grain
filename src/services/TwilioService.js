@@ -9,8 +9,7 @@ class TwilioService {
     // Only initialize Twilio client if valid credentials are provided
     if (this.accountSid && 
         this.authToken && 
-        this.accountSid.startsWith('AC') &&
-        this.authToken.length > 0) {
+        this.accountSid.startsWith('AC')) {
       try {
         this.client = twilio(this.accountSid, this.authToken);
         console.log('Twilio client initialized successfully');
