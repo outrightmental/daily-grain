@@ -258,7 +258,7 @@ firebase deploy --only hosting
 firebase deploy --only firestore
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions and [CI-CD-SETUP.md](CI-CD-SETUP.md) for complete CI/CD setup guide.
 
 ---
 
@@ -415,6 +415,7 @@ Daily Grain follows these principles:
 - **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
 - **[Usage Examples](USAGE.md)** - See example conversations and commands
 - **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
+- **[CI/CD Setup Guide](CI-CD-SETUP.md)** - Configure automated deployments
 
 ---
 

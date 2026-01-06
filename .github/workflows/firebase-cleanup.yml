@@ -1,6 +1,7 @@
+---
 name: Cleanup Preview
 
-on:
+'on':
   pull_request:
     types: [closed]
 
@@ -8,14 +9,14 @@ jobs:
   cleanup:
     name: Clean up Preview Channel
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
-      
+
       - name: Delete Preview Channel
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
@@ -24,19 +25,20 @@ jobs:
           firebase hosting:channel:delete $CHANNEL_ID \
             --token "$FIREBASE_TOKEN" \
             --non-interactive \
-            --force || echo "Channel $CHANNEL_ID may not exist or is already deleted"
-      
+            --force || \
+            echo "Channel $CHANNEL_ID may not exist or is already deleted"
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.issue.number;
             const channelId = `pr-${prNumber}`;
-            
+
             const comment = `## 🧹 Preview Cleanup
-            
+
             Preview channel \`${channelId}\` has been deleted.`;
-            
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
