@@ -10,23 +10,39 @@ class DigestService {
 
     const habits = Habit.findByUserId(userId);
     if (habits.length === 0) {
-      return "You don't have any habits yet! Reply with 'ADD [habit name]' to create your first habit.";
+      return "You don't have any habits yet. Reply with 'ADD [habit name]' to create your first habit.";
     }
 
     const today = new Date().toISOString().split('T')[0];
-    let message = "Daily Habits Check-in:\n\n";
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    let message = "Daily Check-in:\n\n";
 
     habits.forEach((habit, index) => {
-      const log = HabitLog.getLog(habit.id, today);
-      const status = log ? '✓' : '○';
-      const frequencyText = this.formatFrequency(habit);
+      const todayLog = HabitLog.getLog(habit.id, today);
+      const yesterdayLog = HabitLog.getLog(habit.id, yesterday);
+      const streak = HabitLog.getCurrentStreak(habit.id);
+      const stats7 = HabitLog.getCompletionStats(habit.id, 7);
       
-      message += `${index + 1}. ${status} ${habit.name} (${frequencyText})\n`;
+      let statusLine = `${habit.name} (${this.formatFrequency(habit)}): `;
+      
+      if (streak > 0) {
+        statusLine += `${streak}-day streak`;
+      } else if (!yesterdayLog) {
+        statusLine += `missed yesterday`;
+      } else {
+        statusLine += `starting fresh`;
+      }
+
+      // For weekly habits, show weekly progress
+      if (habit.frequency_type === 'x_per_week') {
+        statusLine += `, ${stats7.completedDays} of ${habit.target_count} this week`;
+      }
+
+      message += statusLine + '\n';
     });
 
-    message += "\nReply with numbers to log (e.g., '1 3' for habits 1 and 3)";
-    message += "\nReply 'STATUS' for detailed stats";
-    message += "\nReply 'ADD [name]' to add a habit";
+    message += "\nReply: Y N Y";
+    message += "\nText STATUS anytime for details.";
 
     return message;
   }
@@ -34,13 +50,13 @@ class DigestService {
   static formatFrequency(habit) {
     switch (habit.frequency_type) {
       case 'daily':
-        return 'daily';
+        return 'Daily';
       case 'multiple_per_day':
         return `${habit.target_count}x/day`;
       case 'x_per_week':
         return `${habit.target_count}x/week`;
       default:
-        return 'daily';
+        return 'Daily';
     }
   }
 
@@ -53,16 +69,16 @@ class DigestService {
       return "You don't have any habits tracked yet.";
     }
 
-    let message = "Habit Status Report:\n\n";
+    let message = "Status Report:\n\n";
 
     stats.forEach((stat, index) => {
       if (!stat) return;
       
       const { habit, streak, last7Days, last30Days } = stat;
-      message += `${index + 1}. ${habit.name}\n`;
-      message += `   🔥 ${streak} day streak\n`;
-      message += `   📊 7d: ${last7Days.completionRate}% (${last7Days.completedDays}/${last7Days.totalDays})\n`;
-      message += `   📊 30d: ${last30Days.completionRate}% (${last30Days.completedDays}/${last30Days.totalDays})\n\n`;
+      message += `${habit.name}\n`;
+      message += `Current streak: ${streak} days\n`;
+      message += `Last 7 days: ${last7Days.completionRate}% (${last7Days.completedDays}/${last7Days.totalDays})\n`;
+      message += `Last 30 days: ${last30Days.completionRate}% (${last30Days.completedDays}/${last30Days.totalDays})\n\n`;
     });
 
     return message.trim();

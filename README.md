@@ -45,7 +45,7 @@ The platform prioritizes long-term habit formation, autonomy, and attention resp
 ---
 
 ### 2. Daily SMS Digest (Once Per Day)
-Sent at a user-selected time.
+Sent at a user-selected time (default 9:00 AM).
 
 Includes:
 - All active habits
@@ -55,9 +55,11 @@ Includes:
 Example:
 
 > Daily Check-in:
-> Wash face (Daily): 4-day streak
+> 
+> Morning run (Daily): 4-day streak
 > Read 10 pages (Daily): missed yesterday
 > Gym (3x/week): 1 of 3 this week
+> 
 > Reply: Y N Y
 > Text STATUS anytime for details.
 
@@ -67,9 +69,10 @@ No other reminders are sent that day.
 
 ### 3. Simple Reply Logging
 - Users reply once with short answers (e.g. `Y N Y`)
-- Parser accepts flexible responses (`yes/y/yep`, `no/n`)
+- Parser accepts flexible responses (`yes/y/yep`, `no/n/nope`)
 - Weekly habits aggregate daily replies into weekly totals
 - Missed replies are logged silently (no nagging)
+- Number-based logging still supported for backward compatibility
 
 ---
 
@@ -80,7 +83,7 @@ Response includes:
 - Completion rates
 - Current and best streaks
 - Weekly goal progress
-- Simple text-based visuals if helpful
+- Simple text-based reports
 
 Stats are **never pushed automatically**—only returned on request.
 
@@ -88,10 +91,11 @@ Stats are **never pushed automatically**—only returned on request.
 
 ### 5. Habit Management via SMS
 Supported commands:
-- `ADD` – create a new habit
-- `REMOVE <habit>`
-- `TIME <HH:MM>` – change digest time
-- `PAUSE` / `RESUME`
+- `ADD [name]` – create a new habit
+- `REMOVE [name]` – remove a habit
+- `TIME HH:MM` – change digest time
+- `LIST` - see all habits
+- `PAUSE` / `RESUME` – pause/resume check-ins
 - `STOP` – unsubscribe
 
 ---
@@ -103,7 +107,7 @@ Supported commands:
 - No social features
 - No points, badges, or leaderboards
 - No real-time or multiple daily notifications
-- No qualitative scoring (“how well” you did)
+- No qualitative scoring ("how well" you did)
 
 ---
 
@@ -118,73 +122,9 @@ Supported commands:
 - **Low stimulation supports long-term success**  
   Avoids dopamine fatigue, shame cycles, and notification burnout.
 
-The system should feel like it’s working *for* the user—not managing them.
+The system should feel like it's working *for* the user—not managing them.
 
 ---
-
-## Success Metrics
-
-- Daily reply rate to digests
-- Multi-month retention (2–3+ months)
-- Improvement in habit adherence over time
-- Low opt-out rate
-- User-reported habit internalization
-
----
-
-## Technical Notes (MVP)
-
-- SMS gateway (e.g. Twilio)
-- Lightweight reply parser
-- Minimal data storage (phone + habit logs)
-- SMS compliance (STOP, opt-out messaging)
-- Messages kept concise to avoid segmentation
-
----
-
-## License / Status
-
-Early-stage MVP concept.  
-Built to be simple, boring, and effective.
-# Daily Grain 🌾
-
-A minimalist SMS-based habit tracking platform. No apps, no gamification, no extra notifications—just quiet, user-controlled, long-term habit formation.
-
-## Documentation
-
-- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
-- **[Usage Examples](USAGE.md)** - See example conversations and commands
-- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
-
-## Features
-
-- **SMS-Based Interface**: Users interact entirely via text messages
-- **Multi-Habit Tracking**: Track multiple habits with different frequencies
-  - Daily habits
-  - Multiple times per day (e.g., 3x/day)
-  - X times per week (e.g., 4x/week)
-- **Daily Digest**: Automatic morning SMS summarizing all habits and requesting updates
-- **Simple Logging**: Reply with numbers to log multiple habits at once
-- **On-Demand Stats**: Text "STATUS" anytime to get streaks and completion rates
-- **Minimalist Design**: No apps, no accounts, no complexity
-
-## How It Works
-
-### For Users
-
-1. **Sign Up**: Text any message to the Daily Grain phone number
-2. **Add Habits**: Text `ADD Morning run` to create a new habit
-3. **Daily Check-in**: Receive a morning SMS listing all your habits
-4. **Log Progress**: Reply with numbers (e.g., `1 3` to log habits 1 and 3)
-5. **Check Status**: Text `STATUS` anytime for detailed stats and streaks
-
-### Commands
-
-- `ADD [habit name]` - Add a new habit (will ask for frequency)
-- `LIST` - See all your habits
-- `STATUS` - View detailed stats, streaks, and completion rates
-- `[numbers]` - Log habits (e.g., `1 2 3`)
-- `HELP` - Show help message
 
 ## Setup
 
@@ -247,6 +187,26 @@ Make sure to:
 2. Expose the webhook endpoint publicly
 3. Configure Twilio webhook to point to your deployment
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed platform-specific instructions.
+
+---
+
+## Commands Reference
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `ADD [name]` | Create a new habit | `ADD Morning run` |
+| `REMOVE [name]` | Remove a habit | `REMOVE Morning run` |
+| `LIST` | See all your habits | `LIST` |
+| `STATUS` | View detailed stats | `STATUS` |
+| `TIME HH:MM` | Set check-in time | `TIME 08:30` |
+| `PAUSE` | Pause daily check-ins | `PAUSE` |
+| `RESUME` | Resume daily check-ins | `RESUME` |
+| `STOP` | Unsubscribe | `STOP` |
+| `Y N Y` | Log habits (Yes/No) | `Y N Y` |
+
+---
+
 ## Architecture
 
 ```
@@ -277,6 +237,8 @@ daily-grain/
 - `id`: Primary key
 - `phone_number`: Unique phone number
 - `timezone`: User timezone (default: America/New_York)
+- `digest_time`: Daily check-in time (default: 09:00)
+- `is_paused`: Pause status (0 or 1)
 - `created_at`: Registration timestamp
 
 ### Habits
@@ -300,13 +262,15 @@ daily-grain/
 - `state_data`: JSON data for multi-step flows
 - `updated_at`: Last update timestamp
 
+---
+
 ## Configuration
 
 ### Environment Variables
 
-- `TWILIO_ACCOUNT_SID`: Twilio account SID
-- `TWILIO_AUTH_TOKEN`: Twilio auth token
-- `TWILIO_PHONE_NUMBER`: Your Twilio phone number
+- `TWILIO_ACCOUNT_SID`: Twilio account SID (required)
+- `TWILIO_AUTH_TOKEN`: Twilio auth token (required)
+- `TWILIO_PHONE_NUMBER`: Your Twilio phone number (required)
 - `PORT`: Server port (default: 3000)
 - `DB_PATH`: Database file path (default: ./data/habits.db)
 - `ENABLE_SCHEDULER`: Enable daily digest scheduler (default: true)
@@ -322,6 +286,8 @@ DIGEST_CRON=0 8 * * *  # 8 AM daily
 DIGEST_CRON=0 9 * * 1-5  # 9 AM weekdays only
 ```
 
+---
+
 ## Design Philosophy
 
 Daily Grain follows these principles:
@@ -332,11 +298,49 @@ Daily Grain follows these principles:
 4. **Privacy-First**: Minimal data collection, stored locally
 5. **Long-Term Focus**: Designed for sustainable habit formation
 6. **Quiet**: One message per day unless user initiates
+7. **Neutral Tone**: Supportive without being pushy or exuberant
+
+---
+
+## Success Metrics
+
+- Daily reply rate to digests
+- Multi-month retention (2–3+ months)
+- Improvement in habit adherence over time
+- Low opt-out rate
+- User-reported habit internalization
+
+---
+
+## Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
+- **[Usage Examples](USAGE.md)** - See example conversations and commands
+- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
+
+---
+
+## Technical Notes
+
+- SMS gateway via Twilio
+- Lightweight Y/N reply parser
+- Minimal data storage (phone + habit logs)
+- SMS compliance (STOP, opt-out messaging)
+- Messages kept concise to avoid segmentation
+- Graceful handling of missing credentials for development
+
+---
 
 ## License
 
 ISC
 
+---
+
 ## Contributing
 
 Contributions welcome! Please feel free to submit a Pull Request.
+
+---
+
+**Built to be simple, boring, and effective.**

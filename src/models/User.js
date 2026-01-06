@@ -24,6 +24,23 @@ class User {
     }
     return user;
   }
+
+  static setDigestTime(userId, time) {
+    const stmt = db.prepare('UPDATE users SET digest_time = ? WHERE id = ?');
+    stmt.run(time, userId);
+    return this.findById(userId);
+  }
+
+  static setPaused(userId, isPaused) {
+    const stmt = db.prepare('UPDATE users SET is_paused = ? WHERE id = ?');
+    stmt.run(isPaused ? 1 : 0, userId);
+    return this.findById(userId);
+  }
+
+  static getAll() {
+    const stmt = db.prepare('SELECT * FROM users WHERE is_paused = 0');
+    return stmt.all();
+  }
 }
 
 module.exports = User;

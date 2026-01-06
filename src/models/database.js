@@ -24,6 +24,8 @@ function initializeDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       phone_number TEXT UNIQUE NOT NULL,
       timezone TEXT DEFAULT 'America/New_York',
+      digest_time TEXT DEFAULT '09:00',
+      is_paused INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
