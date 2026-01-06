@@ -9,6 +9,9 @@ jobs:
   cleanup:
     name: Clean up Preview Channel
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Checkout code
