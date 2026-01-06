@@ -109,6 +109,10 @@ class MessageService {
       
       const habit = habits[index];
       const isYes = ['Y', 'YES', 'YEP'].includes(token);
+      const isNo = ['N', 'NO', 'NOPE'].includes(token);
+      
+      // Only process if it's a valid Y or N response
+      if (!isYes && !isNo) return;
       
       if (isYes) {
         HabitService.logHabit(habit.id, today, 1);
@@ -128,10 +132,10 @@ class MessageService {
   static handleSetTime(user, message) {
     const time = message.substring(5).trim();
     
-    // Validate HH:MM format
+    // Validate HH:MM or H:MM format
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(time)) {
-      return "Please use HH:MM format (e.g., TIME 08:30)";
+      return "Please use time format (e.g., TIME 08:30 or TIME 8:30)";
     }
 
     User.setDigestTime(user.id, time);
