@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // By default, deny all client access
+    // All operations should go through Cloud Functions with Admin SDK
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
+    }
+    
+    // Habits collection
+    match /habits/{habitId} {
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
+    }
+    
+    // Habit logs collection
+    match /habitLogs/{logId} {
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
+    }
+    
+    // User state collection
+    match /userStates/{userId} {
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
+    }
+  }
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Grain - SMS Habit Tracker</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      color: #2c5282;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #48bb78;
+      color: white;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    .feature {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f7fafc;
+      border-left: 4px solid #4299e1;
+    }
+    code {
+      background: #edf2f7;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>📱 Daily Grain</h1>
+  <p><span class="badge">SMS-Based Habit Tracker</span></p>
+  
+  <p>
+    A minimalist, SMS-only habit-building agent designed to help users form lasting habits 
+    with <strong>one calm daily check-in</strong> and no notification overload.
+  </p>
+
+  <div class="feature">
+    <h2>🎯 Core Principles</h2>
+    <ul>
+      <li><strong>Single daily touchpoint</strong> - One message per day</li>
+      <li><strong>User-controlled engagement</strong> - You decide when to check in</li>
+      <li><strong>No gamification or pressure</strong> - Just simple tracking</li>
+      <li><strong>Neutral, supportive tone</strong> - Working for you, not managing you</li>
+      <li><strong>Designed for months-long use</strong> - Sustainable habit formation</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <h2>💬 SMS Commands</h2>
+    <ul>
+      <li><code>ADD [name]</code> - Create a new habit</li>
+      <li><code>REMOVE [name]</code> - Remove a habit</li>
+      <li><code>LIST</code> - See all your habits</li>
+      <li><code>STATUS</code> - View detailed stats</li>
+      <li><code>TIME HH:MM</code> - Set check-in time</li>
+      <li><code>PAUSE / RESUME</code> - Pause/resume check-ins</li>
+      <li><code>STOP</code> - Unsubscribe</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <h2>📊 Track Your Progress</h2>
+    <p>
+      Reply to your daily digest with <code>Y N Y</code> to quickly log multiple habits.
+      Text <code>STATUS</code> anytime to see your streaks, completion rates, and progress.
+    </p>
+  </div>
+
+  <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #718096;">
+    <p>
+      Built to be simple, boring, and effective. 
+      <a href="https://github.com/outrightmental/daily-grain" style="color: #4299e1;">View on GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>
