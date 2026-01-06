@@ -1,16 +1,20 @@
 const twilio = require('twilio');
 const { defineString } = require('firebase-functions/params');
 
-// Define config parameters
+// Define config parameters from Firebase Secrets
 const twilioAccountSid = defineString('TWILIO_ACCOUNT_SID');
 const twilioAuthToken = defineString('TWILIO_AUTH_TOKEN');
 const twilioPhoneNumber = defineString('TWILIO_PHONE_NUMBER');
 
 class TwilioService {
   constructor() {
-    this.accountSid = process.env.TWILIO_ACCOUNT_SID || twilioAccountSid.value();
-    this.authToken = process.env.TWILIO_AUTH_TOKEN || twilioAuthToken.value();
-    this.phoneNumber = process.env.TWILIO_PHONE_NUMBER || twilioPhoneNumber.value();
+    // For local development, allow process.env fallback
+    // In production, Firebase Secrets should be used
+    const isLocal = process.env.FUNCTIONS_EMULATOR === 'true';
+    
+    this.accountSid = isLocal ? process.env.TWILIO_ACCOUNT_SID : twilioAccountSid.value();
+    this.authToken = isLocal ? process.env.TWILIO_AUTH_TOKEN : twilioAuthToken.value();
+    this.phoneNumber = isLocal ? process.env.TWILIO_PHONE_NUMBER : twilioPhoneNumber.value();
     
     // Only initialize Twilio client if valid credentials are provided
     if (this.accountSid && 

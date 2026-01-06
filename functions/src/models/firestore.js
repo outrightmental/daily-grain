@@ -7,9 +7,4 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// Configure Firestore settings
-db.settings({
-  timestampsInSnapshots: true
-});
-
 module.exports = { admin, db };
