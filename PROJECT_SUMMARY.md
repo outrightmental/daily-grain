@@ -92,7 +92,7 @@ Daily Grain is a complete, production-ready SMS-based habit tracking platform bu
 ## Technical Architecture
 
 ### Stack
-- **Backend**: Node.js 18+ with Express
+- **Backend**: Node.js 20+ with Express
 - **Database**: SQLite3 (better-sqlite3)
 - **SMS**: Twilio API
 - **Scheduling**: node-cron
