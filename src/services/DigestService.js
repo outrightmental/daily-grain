@@ -18,7 +18,6 @@ class DigestService {
     let message = "Daily Check-in:\n\n";
 
     habits.forEach((habit, index) => {
-      const todayLog = HabitLog.getLog(habit.id, today);
       const yesterdayLog = HabitLog.getLog(habit.id, yesterday);
       const streak = HabitLog.getCurrentStreak(habit.id);
       const stats7 = HabitLog.getCompletionStats(habit.id, 7);
