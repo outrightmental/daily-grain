@@ -8,10 +8,6 @@ yarn-error.log*
 .env
 .env.local
 
-# Database (Legacy SQLite - kept for reference)
-data/*.db
-data/*.db-journal
-
 # Firebase
 .firebase/
 firebase-debug.log

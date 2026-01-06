@@ -1,15 +1,10 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const { defineString } = require('firebase-functions/params');
 const twilio = require('twilio');
 const MessageService = require('./src/services/MessageService');
 const TwilioService = require('./src/services/TwilioService');
 const DigestService = require('./src/services/DigestService');
 const User = require('./src/models/User');
-
-// Define config parameters
-const twilioAccountSid = defineString('TWILIO_ACCOUNT_SID');
-const twilioAuthToken = defineString('TWILIO_AUTH_TOKEN');
 
 /**
  * Webhook endpoint for incoming SMS messages from Twilio
