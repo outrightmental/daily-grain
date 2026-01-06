@@ -4,7 +4,7 @@ Get Daily Grain up and running in 5 minutes.
 
 ## Prerequisites
 
-- Node.js 14+ installed
+- Node.js 20+ installed
 - A Twilio account (free trial works!)
 - Git
 
