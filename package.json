@@ -4,11 +4,13 @@
   "description": "Simple habit-building agent - Firebase version",
   "main": "functions/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node src/index.js",
-    "test": "node test-integration.js",
+    "start": "firebase emulators:start",
+    "dev": "firebase emulators:start",
+    "test": "echo 'Note: Legacy test for SQLite version' && node test-integration.js",
     "deploy": "firebase deploy",
-    "serve": "cd functions && npm run serve"
+    "serve": "cd functions && npm run serve",
+    "legacy:start": "node src/index.js",
+    "legacy:dev": "node src/index.js"
   },
   "keywords": ["sms", "habits", "firebase", "twilio"],
   "author": "",
