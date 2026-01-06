@@ -6,10 +6,19 @@ yarn-error.log*
 
 # Environment variables
 .env
+.env.local
 
-# Database
+# Database (Legacy SQLite - kept for reference)
 data/*.db
 data/*.db-journal
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+.runtimeconfig.json
+ui-debug.log
+firestore-debug.log
 
 # Logs
 logs/
