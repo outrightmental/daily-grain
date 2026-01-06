@@ -133,10 +133,12 @@ The system should feel like it's working *for* the user—not managing them.
 ### Prerequisites
 
 - Node.js 20.x or higher
-- A Twilio account with SMS capabilities
+- A [Firebase](https://firebase.google.com/) account (free tier available)
+- A [Twilio](https://www.twilio.com/) account with SMS capabilities
 - A phone number from Twilio
+- Firebase CLI: `npm install -g firebase-tools`
 
-### Installation
+### Quick Start
 
 1. Clone the repository:
 ```bash
@@ -144,52 +146,96 @@ git clone https://github.com/outrightmental/daily-grain.git
 cd daily-grain
 ```
 
-2. Install dependencies:
+2. Install Firebase CLI (if not already installed):
 ```bash
+npm install -g firebase-tools
+```
+
+3. Login to Firebase:
+```bash
+firebase login
+```
+
+4. Create a new Firebase project:
+```bash
+firebase projects:create daily-grain-your-name
+```
+
+5. Select your project:
+```bash
+firebase use daily-grain-your-name
+```
+
+6. Install dependencies:
+```bash
+cd functions
 npm install
+cd ..
 ```
 
-3. Configure environment variables:
+7. Configure Twilio credentials:
 ```bash
-cp .env.example .env
+firebase functions:config:set \
+  twilio.account_sid="your_account_sid" \
+  twilio.auth_token="your_auth_token" \
+  twilio.phone_number="+1234567890"
 ```
 
-Edit `.env` and add your Twilio credentials:
-```
-TWILIO_ACCOUNT_SID=your_account_sid
-TWILIO_AUTH_TOKEN=your_auth_token
-TWILIO_PHONE_NUMBER=+1234567890
-```
-
-4. Start the server:
+Or set them as Firebase secrets (recommended):
 ```bash
-npm start
+firebase functions:secrets:set TWILIO_ACCOUNT_SID
+firebase functions:secrets:set TWILIO_AUTH_TOKEN
+firebase functions:secrets:set TWILIO_PHONE_NUMBER
+```
+
+8. Deploy to Firebase:
+```bash
+firebase deploy
 ```
 
 ### Twilio Configuration
 
+After deploying to Firebase, configure your Twilio webhook:
+
 1. Log in to your [Twilio Console](https://console.twilio.com/)
-2. Get a phone number with SMS capabilities
-3. Configure the webhook URL for incoming messages:
-   - Go to Phone Numbers → Active Numbers → Select your number
-   - Under "Messaging", set the webhook URL to: `https://your-domain.com/webhook/sms`
-   - Method: `POST`
+2. Go to Phone Numbers → Active Numbers → Select your number
+3. Under "Messaging", set the webhook URL to: `https://YOUR_REGION-YOUR_PROJECT.cloudfunctions.net/webhook/sms`
+4. Method: `POST`
+5. Save your changes
+
+### Local Development
+
+For local development with Firebase emulators:
+
+```bash
+# Start the Firebase emulators
+cd functions
+npm run serve
+```
+
+This will start the Functions and Firestore emulators. The webhook will be available at:
+`http://localhost:5001/YOUR_PROJECT/us-central1/webhook/sms`
 
 ### Deployment
 
-The application can be deployed to any Node.js hosting platform:
+The application is now deployed as Firebase Cloud Functions with Firestore as the database. All infrastructure is managed by Firebase.
 
-- **Heroku**: Add Twilio add-on and set environment variables
-- **Railway**: Connect repo and configure environment variables
-- **DigitalOcean**: Deploy as a Node.js app
-- **AWS/Google Cloud**: Use container or serverless deployment
+**Production Deployment:**
+```bash
+firebase deploy
+```
 
-Make sure to:
-1. Set all environment variables
-2. Expose the webhook endpoint publicly
-3. Configure Twilio webhook to point to your deployment
+**Deploy Functions Only:**
+```bash
+firebase deploy --only functions
+```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed platform-specific instructions.
+**Deploy Hosting Only:**
+```bash
+firebase deploy --only hosting
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions.
 
 ---
 
@@ -211,81 +257,108 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed platform-specific instructions.
 
 ## Architecture
 
+**Firebase Cloud Architecture:**
+
 ```
 daily-grain/
-├── src/
-│   ├── models/          # Database models and schema
-│   │   ├── database.js  # SQLite database initialization
-│   │   ├── User.js      # User model
-│   │   ├── Habit.js     # Habit model
-│   │   ├── HabitLog.js  # Habit logging and stats
-│   │   └── UserState.js # Conversation state management
-│   ├── services/        # Business logic
-│   │   ├── HabitService.js      # Habit management
-│   │   ├── DigestService.js     # Daily digest generation
-│   │   ├── MessageService.js    # SMS message handling
-│   │   ├── TwilioService.js     # Twilio API wrapper
-│   │   └── SchedulerService.js  # Cron jobs for digests
-│   ├── routes/          # API routes
-│   │   └── webhook.js   # Twilio webhook endpoint
-│   └── index.js         # Main application entry point
-├── data/                # SQLite database storage
-└── package.json
+├── functions/               # Firebase Cloud Functions
+│   ├── src/
+│   │   ├── models/         # Firestore data models
+│   │   │   ├── firestore.js    # Firebase Admin initialization
+│   │   │   ├── User.js         # User model (Firestore)
+│   │   │   ├── Habit.js        # Habit model (Firestore)
+│   │   │   ├── HabitLog.js     # Habit logging and stats
+│   │   │   └── UserState.js    # Conversation state management
+│   │   └── services/       # Business logic
+│   │       ├── HabitService.js      # Habit management
+│   │       ├── DigestService.js     # Daily digest generation
+│   │       ├── MessageService.js    # SMS message handling
+│   │       └── TwilioService.js     # Twilio API wrapper
+│   ├── index.js            # Cloud Functions entry point
+│   └── package.json        # Functions dependencies
+├── public/                 # Firebase Hosting files
+│   └── index.html          # Landing page
+├── src/                    # Legacy code (kept for reference)
+├── firebase.json           # Firebase project configuration
+├── firestore.rules         # Firestore security rules
+├── firestore.indexes.json  # Firestore indexes
+└── .firebaserc             # Firebase project aliases
 ```
 
-## Database Schema
+**Cloud Functions:**
+- `webhook` - HTTP function for Twilio SMS webhook
+- `sendDailyDigests` - Scheduled function (runs daily at 9 AM)
 
-### Users
-- `id`: Primary key
-- `phone_number`: Unique phone number
-- `timezone`: User timezone (default: America/New_York)
-- `digest_time`: Daily check-in time (default: 09:00)
-- `is_paused`: Pause status (0 or 1)
-- `created_at`: Registration timestamp
+**Firestore Collections:**
+- `users` - User profiles and preferences
+- `habits` - User habits with frequency settings
+- `habitLogs` - Daily habit completion logs
+- `userStates` - Conversation state for multi-step flows
 
-### Habits
-- `id`: Primary key
-- `user_id`: Foreign key to users
-- `name`: Habit name
-- `frequency_type`: daily | multiple_per_day | x_per_week
-- `target_count`: Number of times (for multiple_per_day and x_per_week)
-- `created_at`: Creation timestamp
+## Firestore Data Model
 
-### Habit Logs
-- `id`: Primary key
-- `habit_id`: Foreign key to habits
-- `completed_count`: Number of completions
-- `log_date`: Date of log (unique per habit per day)
-- `logged_at`: Timestamp of logging
+### Users Collection (`users/{userId}`)
+- `phoneNumber` (string): Unique phone number
+- `timezone` (string): User timezone (default: "America/New_York")
+- `digestTime` (string): Daily check-in time (default: "09:00")
+- `isPaused` (boolean): Pause status
+- `createdAt` (timestamp): Registration timestamp
 
-### User State
-- `user_id`: Foreign key to users (primary key)
-- `state`: Current conversation state
-- `state_data`: JSON data for multi-step flows
-- `updated_at`: Last update timestamp
+### Habits Collection (`habits/{habitId}`)
+- `userId` (string): Reference to user document ID
+- `name` (string): Habit name
+- `frequencyType` (string): "daily" | "multiple_per_day" | "x_per_week"
+- `targetCount` (number): Number of times (for multiple_per_day and x_per_week)
+- `createdAt` (timestamp): Creation timestamp
+
+### Habit Logs Collection (`habitLogs/{habitId}_{date}`)
+- `habitId` (string): Reference to habit document ID
+- `logDate` (string): Date of log (YYYY-MM-DD format)
+- `completedCount` (number): Number of completions
+- `loggedAt` (timestamp): Timestamp of logging
+
+### User States Collection (`userStates/{userId}`)
+- `state` (string): Current conversation state
+- `stateData` (object): JSON data for multi-step flows
+- `updatedAt` (timestamp): Last update timestamp
 
 ---
 
 ## Configuration
 
-### Environment Variables
+### Firebase Configuration
 
-- `TWILIO_ACCOUNT_SID`: Twilio account SID (required)
-- `TWILIO_AUTH_TOKEN`: Twilio auth token (required)
-- `TWILIO_PHONE_NUMBER`: Your Twilio phone number (required)
-- `PORT`: Server port (default: 3000)
-- `DB_PATH`: Database file path (default: ./data/habits.db)
-- `ENABLE_SCHEDULER`: Enable daily digest scheduler (default: true)
-- `DIGEST_CRON`: Cron expression for daily digest (default: 0 9 * * *)
+Firebase configuration is managed through:
+- **Functions Config**: Use `firebase functions:config:set` for configuration
+- **Environment Secrets**: Use `firebase functions:secrets:set` for sensitive data (recommended)
+- **firebase.json**: Project-level Firebase settings
+
+**Required Secrets:**
+- `TWILIO_ACCOUNT_SID`: Twilio account SID
+- `TWILIO_AUTH_TOKEN`: Twilio auth token  
+- `TWILIO_PHONE_NUMBER`: Your Twilio phone number
+
+**Set secrets:**
+```bash
+firebase functions:secrets:set TWILIO_ACCOUNT_SID
+firebase functions:secrets:set TWILIO_AUTH_TOKEN
+firebase functions:secrets:set TWILIO_PHONE_NUMBER
+```
 
 ### Scheduling
 
-Daily digests are sent using cron. The default is 9 AM daily (`0 9 * * *`).
+Daily digests are sent using Firebase Cloud Scheduler. The scheduled function `sendDailyDigests` runs every day at 9 AM Eastern Time by default.
 
-To customize:
-```env
-DIGEST_CRON=0 8 * * *  # 8 AM daily
-DIGEST_CRON=0 9 * * 1-5  # 9 AM weekdays only
+To customize the schedule, edit `functions/index.js`:
+```javascript
+exports.sendDailyDigests = onSchedule({
+  schedule: 'every day 08:00',  // Change time here
+  timeZone: 'America/New_York',
+  memory: '256MiB',
+}, async (event) => {
+  // ...
+});
+```
 ```
 
 ---
@@ -324,12 +397,31 @@ Daily Grain follows these principles:
 
 ## Technical Notes
 
-- SMS gateway via Twilio
-- Lightweight Y/N reply parser
-- Minimal data storage (phone + habit logs)
-- SMS compliance (STOP, opt-out messaging)
-- Messages kept concise to avoid segmentation
-- Graceful handling of missing credentials for development
+- **Infrastructure**: Firebase Cloud Functions (serverless, auto-scaling)
+- **Database**: Cloud Firestore (NoSQL, real-time, fully managed)
+- **SMS Gateway**: Twilio API
+- **Hosting**: Firebase Hosting (global CDN)
+- **Scheduling**: Cloud Scheduler (managed cron jobs)
+- **Authentication**: Phone number-based (no passwords)
+- **Security**: Firestore security rules for data protection
+- **Monitoring**: Firebase Console and Cloud Logging
+- **SMS Compliance**: STOP/START opt-out messaging support
+- **Development**: Firebase Local Emulator Suite for testing
+- **Deployment**: Single command deployment (`firebase deploy`)
+- **Scalability**: Automatic scaling with Firebase infrastructure
+- **Cost**: Free tier available, pay-as-you-grow pricing
+
+### Migration from Legacy SQLite Version
+
+This project has been migrated from a Node.js/Express app with SQLite to Firebase. The legacy code is preserved in the `/src` directory for reference. Key changes:
+
+- **Database**: SQLite → Cloud Firestore
+- **Server**: Express on VM/container → Cloud Functions (serverless)
+- **Scheduler**: node-cron → Cloud Scheduler
+- **Hosting**: Self-hosted → Firebase Hosting
+- **Deployment**: Manual server setup → `firebase deploy`
+
+All API functionality remains the same. Twilio webhook configuration is the only external change needed.
 
 ---
 
