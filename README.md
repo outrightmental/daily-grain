@@ -132,7 +132,7 @@ The system should feel like it's working *for* the user—not managing them.
 
 ### Prerequisites
 
-- Node.js 14 or higher
+- Node.js 20.x or higher
 - A Twilio account with SMS capabilities
 - A phone number from Twilio
 
