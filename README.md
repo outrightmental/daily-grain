@@ -2,6 +2,12 @@
 
 A minimalist SMS-based habit tracking platform. No apps, no gamification, no extra notifications—just quiet, user-controlled, long-term habit formation.
 
+## Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
+- **[Usage Examples](USAGE.md)** - See example conversations and commands
+- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
+
 ## Features
 
 - **SMS-Based Interface**: Users interact entirely via text messages
