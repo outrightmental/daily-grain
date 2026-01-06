@@ -1,7 +1,7 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const twilio = require('twilio');
-const admin = require('firebase-admin');
+const { admin } = require('./src/models/firestore');
 const MessageService = require('./src/services/MessageService');
 const TwilioService = require('./src/services/TwilioService');
 const DigestService = require('./src/services/DigestService');
