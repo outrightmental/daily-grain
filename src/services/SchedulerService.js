@@ -19,8 +19,8 @@ class SchedulerService {
 
   static async sendDailyDigests() {
     try {
-      // Get all users
-      const stmt = db.prepare('SELECT * FROM users');
+      // Get all active (non-paused) users
+      const stmt = db.prepare('SELECT * FROM users WHERE is_paused = 0');
       const users = stmt.all();
 
       console.log(`Sending daily digest to ${users.length} users...`);

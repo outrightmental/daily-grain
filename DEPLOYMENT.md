@@ -93,7 +93,7 @@ docker run -d \
 
 **Dockerfile:**
 ```dockerfile
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -113,7 +113,7 @@ CMD ["npm", "start"]
 
 2. **Install Node.js:**
 ```bash
-curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
 sudo yum install -y nodejs
 ```
 

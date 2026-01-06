@@ -13,7 +13,6 @@ class DigestService {
       return "You don't have any habits yet. Reply with 'ADD [habit name]' to create your first habit.";
     }
 
-    const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
     let message = "Daily Check-in:\n\n";
 
