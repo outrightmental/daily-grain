@@ -48,7 +48,7 @@ exports.webhook = onRequest(async (req, res) => {
     res.json({
       name: 'Daily Grain',
       description: 'SMS-based habit tracking platform',
-      version: '2.0.0',
+      version: '1.1.0',
       endpoints: {
         sms: '/webhook/sms',
         health: '/webhook/health'
