@@ -1,0 +1,21 @@
+{
+  "name": "daily-grain",
+  "version": "1.0.0",
+  "description": "Simple habit-building agent",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "test": "node test-integration.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.5.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "node-cron": "^4.2.1",
+    "twilio": "^5.11.1"
+  }
+}

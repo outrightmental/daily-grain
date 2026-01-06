@@ -1,0 +1,42 @@
+name: CI Tests
+
+on:
+  push:
+    branches: [ main, copilot/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+      env:
+        # Set test environment variables
+        TWILIO_ACCOUNT_SID: test_sid
+        TWILIO_AUTH_TOKEN: test_token
+        TWILIO_PHONE_NUMBER: +15555551234
+        ENABLE_SCHEDULER: false
+        DB_PATH: ./data/test-habits.db
+    
+    - name: Clean up test database
+      if: always()
+      run: rm -f ./data/test-habits.db
