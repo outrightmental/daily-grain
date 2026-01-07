@@ -248,6 +248,106 @@ gcloud firestore import gs://YOUR-BUCKET/backup-20260106
 
 ## Advanced Configuration
 
+### CI/CD Automation
+
+The project includes automated deployment workflows using GitHub Actions for both production and preview environments.
+
+#### Automated Production Deployment
+
+**Workflow:** `.github/workflows/firebase-deploy.yml`
+
+Automatically deploys to Firebase production on every push to the `main` branch.
+
+**Features:**
+- Installs dependencies
+- Deploys all Firebase services (Functions, Hosting, Firestore)
+- Runs on Node.js 20
+- Uses Firebase CI token for authentication
+
+#### Automated Preview Deployments
+
+**Workflow:** `.github/workflows/firebase-preview.yml`
+
+Creates preview environments for every pull request.
+
+**Features:**
+- Deploys to a unique preview channel (`pr-<number>`)
+- Posts preview URL as a PR comment
+- Previews expire after 7 days
+- Automatically updates comment on new commits
+
+**Preview Channel Cleanup:** `.github/workflows/firebase-cleanup.yml`
+
+Automatically deletes preview channels when PRs are closed or merged.
+
+#### Setup Instructions
+
+1. **Generate Firebase CI Token:**
+   ```bash
+   firebase login:ci
+   ```
+   This will open a browser for authentication and output a token.
+
+2. **Add Token to GitHub Secrets:**
+   - Go to your repository on GitHub
+   - Navigate to: Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `FIREBASE_TOKEN`
+   - Value: Paste the token from step 1
+   - Click "Add secret"
+
+3. **Verify Setup:**
+   - Push a commit to `main` to trigger production deployment
+   - Open a PR to trigger a preview deployment
+   - Check the Actions tab to monitor workflow runs
+
+#### Manual Deployment
+
+You can still deploy manually using the Firebase CLI:
+
+```bash
+# Production deployment
+firebase deploy
+
+# Deploy specific components
+firebase deploy --only functions
+firebase deploy --only hosting
+firebase deploy --only firestore
+
+# Preview channel deployment (manual)
+firebase hosting:channel:deploy preview-test --expires 7d
+```
+
+#### Monitoring Deployments
+
+**View workflow runs:**
+- Go to the "Actions" tab in your GitHub repository
+- Select a workflow to see its run history
+- Click on a specific run to see logs and details
+
+**Firebase Console:**
+- [Firebase Console](https://console.firebase.google.com/)
+- Select your project
+- Navigate to "Hosting" to see deployments and preview channels
+- Navigate to "Functions" to see deployed functions
+
+#### Troubleshooting
+
+**Deployment fails with "Permission denied":**
+- Verify `FIREBASE_TOKEN` secret is set correctly
+- Regenerate token: `firebase login:ci`
+- Update the GitHub secret with the new token
+
+**Preview URLs not appearing in PR comments:**
+- Check workflow logs in the Actions tab
+- Verify the workflow has write permissions for pull requests
+- Check if the preview channel was created in Firebase Console
+
+**Preview channel deployment fails:**
+- Ensure Firebase Hosting is enabled in your project
+- Verify `firebase.json` has hosting configuration
+- Check that the project ID in `.firebaserc` is correct
+
 ### Multiple Environments
 
 ```bash
@@ -258,31 +358,6 @@ firebase deploy
 firebase use prod
 firebase deploy
 ```
-
-### CI/CD Integration
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to Firebase
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - run: cd functions && npm ci
-      - run: |
-          npm install -g firebase-tools
-          firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
-```
-
-Generate token: `firebase login:ci`
 
 ## Support Resources
 

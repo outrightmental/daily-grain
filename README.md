@@ -218,24 +218,47 @@ This will start the Functions and Firestore emulators. The webhook will be avail
 
 ### Deployment
 
-The application is now deployed as Firebase Cloud Functions with Firestore as the database. All infrastructure is managed by Firebase.
+The application is deployed as Firebase Cloud Functions with Firestore as the database. All infrastructure is managed by Firebase.
 
-**Production Deployment:**
+#### CI/CD Automation
+
+The project includes automated deployment workflows using GitHub Actions:
+
+**Production Deployment (main branch):**
+- Automatically deploys to Firebase on every push to `main`
+- Workflow: `.github/workflows/firebase-deploy.yml`
+- Deploys all Firebase services (Functions, Hosting, Firestore rules)
+
+**Preview Deployments (Pull Requests):**
+- Automatically creates a preview environment for each PR
+- Preview URLs are posted as PR comments
+- Previews expire after 7 days
+- Workflow: `.github/workflows/firebase-preview.yml`
+- Preview channels are automatically cleaned up when PRs are closed
+
+**Required Setup:**
+1. Generate a Firebase CI token:
+   ```bash
+   firebase login:ci
+   ```
+2. Add the token as a GitHub repository secret named `FIREBASE_TOKEN`:
+   - Go to your repository Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `FIREBASE_TOKEN`
+   - Value: Paste the token from step 1
+
+**Manual Deployment:**
 ```bash
+# Deploy everything
 firebase deploy
-```
 
-**Deploy Functions Only:**
-```bash
+# Deploy specific components
 firebase deploy --only functions
-```
-
-**Deploy Hosting Only:**
-```bash
 firebase deploy --only hosting
+firebase deploy --only firestore
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions and [CI-CD-SETUP.md](CI-CD-SETUP.md) for complete CI/CD setup guide.
 
 ---
 
@@ -392,6 +415,7 @@ Daily Grain follows these principles:
 - **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
 - **[Usage Examples](USAGE.md)** - See example conversations and commands
 - **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
+- **[CI/CD Setup Guide](CI-CD-SETUP.md)** - Configure automated deployments
 
 ---
 
