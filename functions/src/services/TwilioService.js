@@ -3,6 +3,16 @@ const { twilioAccountSid, twilioAuthToken, twilioPhoneNumber } = require('../con
 
 class TwilioService {
   constructor() {
+    this.client = null;
+    this.initialized = false;
+  }
+
+  // Initialize the Twilio client lazily at runtime (not at deployment time)
+  _ensureInitialized() {
+    if (this.initialized) {
+      return;
+    }
+
     // For local development, allow process.env fallback
     // In production, Firebase Secrets should be used
     const isLocal = process.env.FUNCTIONS_EMULATOR === 'true';
@@ -26,9 +36,13 @@ class TwilioService {
       console.warn('Twilio credentials not configured or invalid. SMS sending will be disabled.');
       this.client = null;
     }
+
+    this.initialized = true;
   }
 
   async sendSMS(toPhoneNumber, message) {
+    this._ensureInitialized();
+    
     if (!this.client) {
       console.log('Twilio not configured. Would send SMS to', toPhoneNumber, ':', message);
       return { success: false, error: 'Twilio not configured' };
@@ -48,6 +62,8 @@ class TwilioService {
   }
 
   async sendDailyDigests(users) {
+    this._ensureInitialized();
+    
     const results = [];
     for (const user of users) {
       const result = await this.sendSMS(user.phoneNumber, user.message);
