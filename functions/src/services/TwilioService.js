@@ -1,10 +1,10 @@
 const twilio = require('twilio');
-const { defineString } = require('firebase-functions/params');
+const { defineSecret } = require('firebase-functions/params');
 
 // Define config parameters from Firebase Secrets
-const twilioAccountSid = defineString('TWILIO_ACCOUNT_SID');
-const twilioAuthToken = defineString('TWILIO_AUTH_TOKEN');
-const twilioPhoneNumber = defineString('TWILIO_PHONE_NUMBER');
+const twilioAccountSid = defineSecret('TWILIO_ACCOUNT_SID');
+const twilioAuthToken = defineSecret('TWILIO_AUTH_TOKEN');
+const twilioPhoneNumber = defineSecret('TWILIO_PHONE_NUMBER');
 
 class TwilioService {
   constructor() {
