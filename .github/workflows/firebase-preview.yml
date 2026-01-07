@@ -38,16 +38,29 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           CHANNEL_ID="pr-${{ github.event.pull_request.number }}"
-          firebase hosting:channel:deploy $CHANNEL_ID \
+
+          # Deploy and capture output
+          DEPLOY_OUTPUT=$(firebase hosting:channel:deploy $CHANNEL_ID \
             --expires 7d \
             --token "$FIREBASE_TOKEN" \
-            --non-interactive \
-            --json > deploy-output.json
+            --non-interactive 2>&1)
+
+          echo "$DEPLOY_OUTPUT"
 
           # Extract the preview URL from the output
-          PREVIEW_URL=$(cat deploy-output.json | \
-            grep -o '"url":"[^"]*"' | head -1 | \
-            sed 's/"url":"//;s/"//')
+          # Firebase CLI outputs URLs in format:
+          # https://PROJECT--CHANNEL-ID-HASH.web.app
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | \
+            grep -oE 'https://[a-zA-Z0-9._-]+\.web\.app' | head -1)
+
+          if [ -z "$PREVIEW_URL" ]; then
+            # Try alternative format
+            PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | \
+              grep -oE 'https://[a-zA-Z0-9._-]+\.firebaseapp\.com' | \
+              head -1)
+          fi
+
+          echo "Extracted Preview URL: $PREVIEW_URL"
           echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
 
       - name: Comment on PR
@@ -58,11 +71,24 @@ jobs:
             const prNumber = context.issue.number;
             const channelId = `pr-${prNumber}`;
 
+            let urlSection = '';
+            if (previewUrl && previewUrl.trim() !== '') {
+              urlSection = `**Preview URL:** ${previewUrl}`;
+            } else {
+              const repo = '${{ github.repository }}';
+              const runId = '${{ github.run_id }}';
+              const actionsUrl =
+                `https://github.com/${repo}/actions/runs/${runId}`;
+              const logLink = `[Actions log](${actionsUrl})`;
+              urlSection =
+                `**Preview URL:** Check the ${logLink} for the deployment URL`;
+            }
+
             const comment = `## 🚀 Preview Deployment
 
             Your preview deployment is ready!
 
-            **Preview URL:** ${previewUrl}
+            ${urlSection}
             **Channel ID:** \`${channelId}\`
             **Expires:** 7 days from now
 
