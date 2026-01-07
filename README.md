@@ -8,6 +8,8 @@ A minimalist, SMS-only habit-building agent designed to help users form lasting 
 This is not a motivation app.  
 It is a low-noise habit status and reflection system.
 
+**New!** Web dashboard for viewing detailed analytics and reports (SMS-based login only).
+
 ---
 
 ## Overview
@@ -20,6 +22,7 @@ Users:
 - Receive **one daily SMS digest**
 - Reply once per day to log progress
 - Request detailed stats only when they want them
+- **View detailed analytics via the web dashboard** (SMS authentication required)
 
 The platform prioritizes long-term habit formation, autonomy, and attention respect.
 
@@ -47,7 +50,16 @@ The platform prioritizes long-term habit formation, autonomy, and attention resp
 
 ---
 
-### 2. Daily SMS Digest (Once Per Day)
+### 2. Web Dashboard (New!)
+- **SMS-based authentication** - Login with your phone number
+- **Detailed analytics** - View completion rates, streaks, and trends
+- **Visual reports** - Progress bars and statistics for each habit
+- **Secure access** - Your data is private and secure
+- See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for detailed usage instructions
+
+---
+
+### 3. Daily SMS Digest (Once Per Day)
 Sent at a user-selected time (default 9:00 AM).
 
 Includes:
@@ -70,7 +82,7 @@ No other reminders are sent that day.
 
 ---
 
-### 3. Simple Reply Logging
+### 4. Simple Reply Logging
 - Users reply once with short answers (e.g. `Y N Y`)
 - Parser accepts flexible responses (`yes/y/yep`, `no/n/nope`)
 - Weekly habits aggregate daily replies into weekly totals
@@ -79,7 +91,7 @@ No other reminders are sent that day.
 
 ---
 
-### 4. On-Demand Status Reports
+### 5. On-Demand Status Reports
 Users can text `STATUS` at any time.
 
 Response includes:
@@ -92,7 +104,7 @@ Stats are **never pushed automatically**—only returned on request.
 
 ---
 
-### 5. Habit Management via SMS
+### 6. Habit Management via SMS
 Supported commands:
 - `ADD [name]` – create a new habit
 - `REMOVE [name]` – remove a habit
@@ -105,7 +117,7 @@ Supported commands:
 
 ## What This Platform Is Not
 
-- No mobile app
+- No mobile app (but includes a web dashboard)
 - No AI coaching or therapy language
 - No social features
 - No points, badges, or leaderboards
@@ -484,6 +496,7 @@ Daily Grain follows these principles:
 - **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
 - **[Usage Examples](USAGE.md)** - See example conversations and commands
 - **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
+- **[Web UI Guide](WEB_UI_GUIDE.md)** - Using the web dashboard for analytics
 - **[CI/CD Setup Guide](CI-CD-SETUP.md)** - Configure automated deployments
 
 ---
@@ -494,6 +507,7 @@ Daily Grain follows these principles:
 - **Database**: Cloud Firestore (NoSQL, real-time, fully managed)
 - **SMS Gateway**: Twilio API
 - **Hosting**: Firebase Hosting (global CDN)
+- **Web Authentication**: Firebase Phone Authentication (SMS-based login)
 - **Scheduling**: Cloud Scheduler (managed cron jobs)
 - **Authentication**: Phone number-based (no passwords)
 - **Security**: Firestore security rules for data protection

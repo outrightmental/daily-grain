@@ -57,7 +57,25 @@ firebase functions:secrets:set TWILIO_PHONE_NUMBER
 # Enter: +15551234567
 ```
 
-### 5. Deploy to Firebase
+### 5. Enable Firebase Authentication
+
+The web dashboard requires Firebase Phone Authentication to be enabled:
+
+```bash
+# Enable Authentication in Firebase Console
+# Or use the Firebase CLI (if available):
+firebase init auth
+```
+
+Alternatively, enable it manually:
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Navigate to **Authentication** → **Sign-in method**
+4. Enable **Phone** provider
+5. Configure your domain for authentication (if using custom domain)
+
+### 6. Deploy to Firebase
 
 ```bash
 # Deploy everything: Functions, Firestore rules, Hosting
@@ -72,7 +90,7 @@ firebase deploy --only hosting
 firebase deploy --only firestore
 ```
 
-### 6. Configure Twilio Webhook
+### 7. Configure Twilio Webhook
 
 After deployment, get your function URL from the output:
 
@@ -83,6 +101,26 @@ After deployment, get your function URL from the output:
    - Set URL to: `https://us-central1-YOUR-PROJECT.cloudfunctions.net/webhook/sms`
    - Set HTTP Method to: `POST`
 5. Click **Save**
+
+### 8. Access the Web Dashboard
+
+After deployment, the web UI will be available at:
+
+```
+https://YOUR-PROJECT.web.app/
+```
+
+Or with a custom domain:
+```
+https://your-custom-domain.com/
+```
+
+Users can:
+1. Visit `/login.html` to login with their phone number
+2. Receive SMS verification code
+3. Access `/dashboard.html` to view their habit analytics
+
+See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for detailed usage instructions.
 
 ## Local Development
 
@@ -143,7 +181,12 @@ Expected response:
    - Handles incoming SMS from Twilio
    - Endpoints: `/sms`, `/health`
 
-2. **sendDailyDigests** (Scheduled Function)
+2. **api** (HTTP Function)
+   - Authenticated API for web dashboard
+   - Endpoints: `/api/dashboard`
+   - Requires Firebase Auth token
+
+3. **sendDailyDigests** (Scheduled Function)
    - Sends daily habit check-in messages
    - Schedule: Every day at 9:00 AM Eastern Time
 
@@ -194,6 +237,21 @@ gcloud firestore import gs://YOUR-BUCKET/backup-20260106
 1. Check scheduler logs: `firebase functions:log --only sendDailyDigests`
 2. Verify scheduler is enabled in [Cloud Scheduler Console](https://console.cloud.google.com/cloudscheduler)
 3. Manually trigger: `gcloud functions call sendDailyDigests`
+
+### Web Dashboard Login Not Working
+
+1. Verify Firebase Authentication is enabled in Firebase Console
+2. Check that Phone provider is enabled under Authentication → Sign-in method
+3. Ensure your domain is authorized (check Authentication → Settings → Authorized domains)
+4. Check browser console for JavaScript errors
+5. Verify the `api` function is deployed: `firebase functions:list`
+
+### Dashboard Not Showing Data
+
+1. Verify user has created habits via SMS first
+2. Check API function logs: `firebase functions:log --only api`
+3. Ensure Firestore security rules are deployed: `firebase deploy --only firestore:rules`
+4. Test API endpoint with curl (requires valid auth token)
 
 ### Deployment Failed
 

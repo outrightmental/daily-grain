@@ -1,9 +1,11 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const twilio = require('twilio');
+const { admin } = require('./src/models/firestore');
 const MessageService = require('./src/services/MessageService');
 const TwilioService = require('./src/services/TwilioService');
 const DigestService = require('./src/services/DigestService');
+const HabitService = require('./src/services/HabitService');
 const User = require('./src/models/User');
 const { twilioAccountSid, twilioAuthToken, twilioPhoneNumber } = require('./src/config/secrets');
 
@@ -71,6 +73,117 @@ exports.webhook = onRequest({
     }
   }
 });
+
+/**
+ * API endpoint for web dashboard
+ * Requires authentication via Firebase Auth
+ */
+exports.api = onRequest({ cors: true }, async (req, res) => {
+  try {
+    // Enable CORS
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    // Verify authentication
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    let decodedToken;
+    
+    try {
+      decodedToken = await admin.auth().verifyIdToken(token);
+    } catch (error) {
+      console.error('Token verification error:', error);
+      res.status(401).json({ error: 'Invalid authentication token' });
+      return;
+    }
+
+    const phoneNumber = decodedToken.phone_number;
+    if (!phoneNumber) {
+      res.status(401).json({ error: 'Phone number not found in token' });
+      return;
+    }
+
+    // Get user from database
+    const user = await User.findByPhoneNumber(phoneNumber);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Route API requests
+    if (req.path === '/dashboard' || req.path === '/api/dashboard') {
+      await handleDashboardRequest(user, res);
+      return;
+    }
+
+    res.status(404).json({ error: 'Endpoint not found' });
+  } catch (error) {
+    console.error('API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Handle dashboard data request
+ */
+async function handleDashboardRequest(user, res) {
+  try {
+    // Get all user stats
+    const statsArray = await HabitService.getAllUserStats(user.id);
+    
+    // Format habits with their stats
+    const habits = statsArray.map(stat => {
+      if (!stat) return null;
+      return {
+        id: stat.habit.id,
+        name: stat.habit.name,
+        frequencyType: stat.habit.frequencyType,
+        targetCount: stat.habit.targetCount,
+        streak: stat.streak,
+        last7Days: stat.last7Days,
+        last30Days: stat.last30Days
+      };
+    }).filter(h => h !== null);
+
+    // Calculate overall stats
+    const totalHabits = habits.length;
+    const activeStreaks = habits.filter(h => h.streak > 0).length;
+    const longestStreak = habits.length > 0 
+      ? Math.max(...habits.map(h => h.streak)) 
+      : 0;
+    
+    // Calculate average 7-day completion
+    const avgCompletion = habits.length > 0
+      ? Math.round(
+          habits.reduce((sum, h) => sum + (h.last7Days?.completionRate || 0), 0) / habits.length
+        )
+      : 0;
+
+    res.json({
+      habits,
+      stats: {
+        totalHabits,
+        activeStreaks,
+        longestStreak,
+        avgCompletion
+      }
+    });
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    res.status(500).json({ error: 'Failed to load dashboard data' });
+  }
+}
 
 /**
  * Scheduled function to send daily digests

@@ -3,6 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // By default, deny all client access
     // All operations should go through Cloud Functions with Admin SDK
+    // The web dashboard uses the API Cloud Function which has Admin SDK access
     
     // Users collection
     match /users/{userId} {
