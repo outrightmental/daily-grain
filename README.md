@@ -1,6 +1,7 @@
 # Daily Grain
 
 [![CI Tests](https://github.com/outrightmental/daily-grain/actions/workflows/ci.yml/badge.svg)](https://github.com/outrightmental/daily-grain/actions/workflows/ci.yml)
+[![Deploy to Firebase](https://github.com/outrightmental/daily-grain/actions/workflows/firebase-deploy.yml/badge.svg)](https://github.com/outrightmental/daily-grain/actions/workflows/firebase-deploy.yml)
 
 A minimalist, SMS-only habit-building agent designed to help users form lasting habits with **one calm daily check-in** and no notification overload.
 
@@ -230,24 +231,47 @@ This will start the Functions and Firestore emulators. The webhook will be avail
 
 ### Deployment
 
-The application is now deployed as Firebase Cloud Functions with Firestore as the database. All infrastructure is managed by Firebase.
+The application is deployed as Firebase Cloud Functions with Firestore as the database. All infrastructure is managed by Firebase.
 
-**Production Deployment:**
+#### CI/CD Automation
+
+The project includes automated deployment workflows using GitHub Actions:
+
+**Production Deployment (main branch):**
+- Automatically deploys to Firebase on every push to `main`
+- Workflow: `.github/workflows/firebase-deploy.yml`
+- Deploys all Firebase services (Functions, Hosting, Firestore rules)
+
+**Preview Deployments (Pull Requests):**
+- Automatically creates a preview environment for each PR
+- Preview URLs are posted as PR comments
+- Previews expire after 7 days
+- Workflow: `.github/workflows/firebase-preview.yml`
+- Preview channels are automatically cleaned up when PRs are closed
+
+**Required Setup:**
+1. Generate a Firebase CI token:
+   ```bash
+   firebase login:ci
+   ```
+2. Add the token as a GitHub repository secret named `FIREBASE_TOKEN`:
+   - Go to your repository Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `FIREBASE_TOKEN`
+   - Value: Paste the token from step 1
+
+**Manual Deployment:**
 ```bash
+# Deploy everything
 firebase deploy
-```
 
-**Deploy Functions Only:**
-```bash
+# Deploy specific components
 firebase deploy --only functions
-```
-
-**Deploy Hosting Only:**
-```bash
 firebase deploy --only hosting
+firebase deploy --only firestore
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed Firebase deployment instructions and [CI-CD-SETUP.md](CI-CD-SETUP.md) for complete CI/CD setup guide.
 
 ---
 
@@ -371,7 +395,75 @@ exports.sendDailyDigests = onSchedule({
   // ...
 });
 ```
-```
+
+---
+
+## Twilio A2P Campaign
+
+### A2P Brand
+
+> Outright Mental Inc
+
+### Campaign description
+
+> This campaign sends one-time authentication codes and daily habit tracking check-ins to end users who sign up for Daily Grain, an SMS-based habit building platform. Users receive one daily digest message at their preferred time (default 9 AM) listing their habits and progress, and can reply to log their habit completions.  Users can also text commands at any time to manage habits, view statistics, or adjust settings.
+
+### Sample message #1
+
+> Daily Check-in: 
+> 
+> Morning run (Daily): 4-day streak
+> Read 10 pages (Daily): missed yesterday
+> Gym (3x/week): 1 of 3 this week
+> 
+> Reply: Y N Y
+> Text STATUS anytime for details.
+
+### Sample message #2
+
+> Your one-time passcode is 782456.
+
+### Sample message #3
+
+> Added daily habit: "Morning run"
+> Reply LIST to see all habits.
+
+### Sample message #4
+
+> STATUS Report: 
+> 
+> Morning run (Daily)
+> - Current streak: 4 days
+> - Best streak: 12 days
+> - 7-day rate: 85%
+> - 30-day rate: 78%
+> 
+> Read 10 pages (Daily)
+> - Current streak: 0 days
+> - Best streak: 6 days
+> - 7-day rate: 71%
+> - 30-day rate: 65%
+> 
+> Text HELP for commands.
+
+### Sample message #5
+
+> Logged:  Morning run, Gym
+> Text STATUS anytime for details.
+
+### How do end-users consent to receive messages? (40-2048 characters)
+
+End users opt-in by visiting dailygrain.example.com and entering their phone number to create an account, or by texting any command to our service number.  Upon first message, users receive an automatic welcome confirming opt-in.  Users can text STOP at any time to unsubscribe.  Additionally, end users create an account after texting their first message, which constitutes explicit opt-in to receive daily habit check-ins and respond to their commands.  Each daily digest includes instructions on how to text STOP to opt-out.
+
+### Opt-in Keywords (max 255 characters)
+
+> START, HELP, ADD, LIST, STATUS
+
+###
+
+Opt-in Message (20-320 characters)
+
+> Welcome to Daily Grain!  You're now opted-in.  You'll receive one daily check-in at 9:00 AM. Reply with your habit progress anytime.  For help, reply HELP. To opt-out, reply STOP.
 
 ---
 
@@ -405,6 +497,7 @@ Daily Grain follows these principles:
 - **[Usage Examples](USAGE.md)** - See example conversations and commands
 - **[Deployment Guide](DEPLOYMENT.md)** - Deploy to production platforms
 - **[Web UI Guide](WEB_UI_GUIDE.md)** - Using the web dashboard for analytics
+- **[CI/CD Setup Guide](CI-CD-SETUP.md)** - Configure automated deployments
 
 ---
 
