@@ -5,11 +5,14 @@ const MessageService = require('./src/services/MessageService');
 const TwilioService = require('./src/services/TwilioService');
 const DigestService = require('./src/services/DigestService');
 const User = require('./src/models/User');
+const { twilioAccountSid, twilioAuthToken, twilioPhoneNumber } = require('./src/config/secrets');
 
 /**
  * Webhook endpoint for incoming SMS messages from Twilio
  */
-exports.webhook = onRequest(async (req, res) => {
+exports.webhook = onRequest({
+  secrets: [twilioAccountSid, twilioAuthToken, twilioPhoneNumber]
+}, async (req, res) => {
   try {
     // Only handle POST requests
     if (req.method !== 'POST') {
@@ -77,6 +80,7 @@ exports.sendDailyDigests = onSchedule({
   schedule: 'every day 09:00',
   timeZone: 'America/New_York',
   memory: '256MiB',
+  secrets: [twilioAccountSid, twilioAuthToken, twilioPhoneNumber]
 }, async (event) => {
   try {
     console.log('Starting daily digest job...');
