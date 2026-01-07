@@ -1,36 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
+    // By default, deny all client access
+    // All operations should go through Cloud Functions with Admin SDK
+    // The web dashboard uses the API Cloud Function which has Admin SDK access
     
     // Users collection
     match /users/{userId} {
-      // Allow authenticated users to read their own data
-      allow read: if isAuthenticated() && 
-                     get(/databases/$(database)/documents/users/$(userId)).data.phoneNumber == request.auth.token.phone_number;
-      // Only Cloud Functions with Admin SDK can write
-      allow write: if false;
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
     }
     
     // Habits collection
     match /habits/{habitId} {
-      // Allow authenticated users to read their own habits
-      // Note: This requires checking if the habit belongs to a user with matching phone number
-      allow read: if isAuthenticated();
-      // Only Cloud Functions with Admin SDK can write
-      allow write: if false;
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
     }
     
     // Habit logs collection
     match /habitLogs/{logId} {
-      // Allow authenticated users to read logs
-      // Note: Log access is controlled through the API layer
-      allow read: if isAuthenticated();
-      // Only Cloud Functions with Admin SDK can write
-      allow write: if false;
+      allow read, write: if false;  // Only Cloud Functions with Admin SDK
     }
     
     // User state collection
