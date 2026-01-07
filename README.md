@@ -1,6 +1,7 @@
 # Daily Grain
 
 [![CI Tests](https://github.com/outrightmental/daily-grain/actions/workflows/ci.yml/badge.svg)](https://github.com/outrightmental/daily-grain/actions/workflows/ci.yml)
+[![Deploy to Firebase](https://github.com/outrightmental/daily-grain/actions/workflows/firebase-deploy.yml/badge.svg)](https://github.com/outrightmental/daily-grain/actions/workflows/firebase-deploy.yml)
 
 A minimalist, SMS-only habit-building agent designed to help users form lasting habits with **one calm daily check-in** and no notification overload.
 
